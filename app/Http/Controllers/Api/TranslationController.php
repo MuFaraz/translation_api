@@ -8,78 +8,56 @@ use Illuminate\Http\Request;
 
 class TranslationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index(Request $request)
     {
-        return Translation::query()
-            ->when($request->key, fn($q) => $q->where('key', 'like', "%{$request->key}%"))
-            ->when($request->value, fn($q) => $q->where('value', 'like', "%{$request->value}%"))
-            ->when($request->tag, fn($q) => $q->where('tag', $request->tag))
-            ->paginate(50);
+        $query = Translation::query();
+
+        if ($request->filled('key')) {
+            $query->where('key', 'like', '%' . $request->key . '%');
+        }
+
+        if ($request->filled('tag')) {
+            $query->whereJsonContains('tags', $request->tag);
+        }
+
+        if ($request->filled('locale')) {
+            $query->where('locale', $request->locale);
+        }
+
+        return response()->json($query->paginate(20), 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $data = $request->validate([
             'key' => 'required|string',
-            'value' => 'required|string',
             'locale' => 'required|string',
-            'tag' => 'nullable|string',
+            'value' => 'required|string',
+            'tags' => 'nullable|array'
         ]);
 
-        return Translation::create($data);
+        $translation = Translation::updateOrCreate(
+            ['key' => $data['key'], 'locale' => $data['locale']],
+            ['value' => $data['value'], 'tags' => $data['tags'] ?? []]
+        );
+
+        return response()->json($translation, 201);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         $translation = Translation::findOrFail($id);
-        $translation->update($request->all());
-        return $translation;
+        $translation->update($request->only('value', 'tags'));
+
+        return response()->json($translation, 200);
     }
+
     public function export($locale)
     {
-        return Translation::where('locale', $locale)
-            ->get()
-            ->pluck('value', 'key');
-    }
+        $translations = Translation::where('locale', $locale)->get();
 
+        $result = $translations->pluck('value', 'key');
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        return response()->json($result, 200, [], JSON_UNESCAPED_UNICODE);
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\Api\TranslationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -15,11 +16,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:api')->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/translations', [TranslationController::class, 'index']);
+    Route::post('/translations', [TranslationController::class, 'store']);
+    Route::put('/translations/{id}', [TranslationController::class, 'update']);
     Route::get('/translations/export/{locale}', [TranslationController::class, 'export']);
-    Route::apiResource('translations', TranslationController::class)->only(['index', 'store', 'update']);
 });
