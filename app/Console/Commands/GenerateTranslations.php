@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Translation;
 use Illuminate\Console\Command;
 
 class GenerateTranslations extends Command
@@ -11,23 +12,26 @@ class GenerateTranslations extends Command
      *
      * @var string
      */
-    protected $signature = 'command:name';
+    protected $signature = 'translations:generate';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Generate dummy translations for testing performance';
 
     /**
      * Execute the console command.
      *
      * @return int
      */
-    
     public function handle()
     {
-        return Command::SUCCESS;
+        $this->info('Generating 100 translations');
+
+        Translation::factory()->count(100)->create();
+
+        $this->info('Done!');
     }
 }

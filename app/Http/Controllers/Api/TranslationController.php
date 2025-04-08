@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Translation;
 use Illuminate\Http\Request;
 
 class TranslationController extends Controller
@@ -12,9 +13,13 @@ class TranslationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        return Translation::query()
+            ->when($request->key, fn($q) => $q->where('key', 'like', "%{$request->key}%"))
+            ->when($request->value, fn($q) => $q->where('value', 'like', "%{$request->value}%"))
+            ->when($request->tag, fn($q) => $q->where('tag', $request->tag))
+            ->paginate(50);
     }
 
     /**
@@ -25,7 +30,14 @@ class TranslationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'key' => 'required|string',
+            'value' => 'required|string',
+            'locale' => 'required|string',
+            'tag' => 'nullable|string',
+        ]);
+
+        return Translation::create($data);
     }
 
     /**
@@ -48,8 +60,17 @@ class TranslationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $translation = Translation::findOrFail($id);
+        $translation->update($request->all());
+        return $translation;
     }
+    public function export($locale)
+    {
+        return Translation::where('locale', $locale)
+            ->get()
+            ->pluck('value', 'key');
+    }
+
 
     /**
      * Remove the specified resource from storage.
