@@ -34,7 +34,7 @@ php artisan translations:generate # Generates 100,000+ translations for testing
 php artisan serve
 ```
 
-> 🔐 JWT Auth is used. Sanctum is removed.
+> JWT Auth is used
 
 ### 🧪 Run Tests
 ```bash
