@@ -15,33 +15,10 @@ A high-performance, scalable API-driven Translation Management System built usin
 - Efficient JSON export endpoint for 100k+ translations (<500ms)
 - JWT-based authentication (no Sanctum)
 - Swagger/OpenAPI documentation
-- Unit & Feature tests included
 - Artisan command to generate dummy translations
 
 ---
 
-## Project Structure
-
-```
-api/         # Laravel backend API
-├── app/Console/Commands/GenerateTranslations.php
-├── app/Http/Controllers/Api/TranslationController.php
-├── app/Models/Translation.php
-├── database/factories/TranslationFactory.php
-├── database/seeders/UserSeeder.php
-├── routes/api.php
-├── tests/Feature/TranslationApiTest.php
-│
-└── public/docs/        # Swagger UI output
-
-frontend/    # Vue 3 + Tailwind CSS frontend
-├── src/components/TranslationList.vue
-├── tailwind.config.js
-├── postcss.config.js
-└── vite.config.js
-```
-
----
 
 ## Setup Instructions
 
